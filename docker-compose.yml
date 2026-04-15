@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  csv-tool:
+    image: busybox:latest
+    container_name: csv-tool
+    command: httpd -f -p 80 -h /www
+    ports:
+      - "8080:80"
+    volumes:
+      - ./index.html:/www/index.html:ro

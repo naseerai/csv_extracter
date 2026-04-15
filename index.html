@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV → Clean Extract</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #888;
+            padding: 40px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 500px;
+            cursor: pointer;
+        }
+
+        .drop-zone.dragover {
+            background: #e8f5e9;
+            border-color: green;
+        }
+
+        textarea {
+            width: 95%;
+            height: 300px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Drag File → Get NUMBER / STATUS / REASON</h2>
+
+<div class="drop-zone" id="dropZone">
+    Drag & Drop CSV / TSV Here
+</div>
+
+<textarea id="output" placeholder="Output will appear here..."></textarea><br>
+
+<button onclick="copyOutput()">Copy Output</button>
+
+<script>
+const dropZone = document.getElementById("dropZone");
+const outputBox = document.getElementById("output");
+
+dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+
+    const file = e.dataTransfer.files[0];
+    processFile(file);
+});
+
+function processFile(file) {
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const text = e.target.result;
+
+        const firstLine = text.split("\n")[0];
+        const delimiter = firstLine.includes("\t") ? "\t" : ",";
+
+        const rows = text.split("\n").map(r => r.split(delimiter));
+
+        // Normalize headers
+        const headers = rows[0].map(h => h.trim().toLowerCase());
+
+        const receiverIndex = headers.findIndex(h => h.includes("receiver"));
+        const statusIndex = headers.findIndex(h => h.includes("status"));
+        const errorIndex = headers.findIndex(h => h.includes("error"));
+
+        if (receiverIndex === -1 || statusIndex === -1 || errorIndex === -1) {
+            alert("Columns not found!");
+            return;
+        }
+
+        let output = [];
+
+        // TAB separated header
+        output.push("NUMBER\tSTATUS\tREASON");
+
+        for (let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            if (row.length < headers.length) continue;
+
+            let number = row[receiverIndex]?.trim() || "";
+            let status = row[statusIndex]?.trim() || "";
+            let reason = row[errorIndex]?.trim() || "";
+
+            output.push(`${number}\t${status}\t${reason}`);
+        }
+
+        outputBox.value = output.join("\n");
+    };
+
+    reader.readAsText(file);
+}
+
+function copyOutput() {
+    outputBox.select();
+    document.execCommand("copy");
+    alert("Copied!");
+}
+</script>
+
+</body>
+</html> 
