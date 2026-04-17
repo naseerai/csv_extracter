@@ -99,7 +99,7 @@ function processFile(file) {
 
         let output = [];
 
-        // TAB separated header
+        // Header
         output.push("NUMBER\tSTATUS\tREASON");
 
         for (let i = 1; i < rows.length; i++) {
@@ -123,8 +123,15 @@ function copyOutput() {
     outputBox.select();
     document.execCommand("copy");
     alert("Copied!");
+
+    // Random delay between 5–10 seconds
+    const delay = Math.floor(Math.random() * 5000) + 5000;
+
+    setTimeout(() => {
+        location.reload();
+    }, delay);
 }
 </script>
 
 </body>
-</html> 
+</html>
